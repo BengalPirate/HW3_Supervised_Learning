@@ -1,7 +1,8 @@
 # CSC 621 - HW3 Classification Project
 
 ## Team Members
-[Add your names here]
+Brandon 
+Mounika
 
 ## Project Overview
 This project implements a multi-class classification system for a 4-class problem using various machine learning algorithms. The solution employs a One-vs-Rest strategy to handle the multi-class classification task.
