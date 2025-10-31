@@ -1,0 +1,25 @@
+CSC 621 - HW3 Optimized Classification Results
+======================================================================
+
+Improvements Applied:
+  - Feature engineering (interactions, polynomials, statistics)
+  - SMOTE for class imbalance
+  - XGBoost + LightGBM ensemble
+  - 500 estimators per model
+  - Optimized ensemble weights
+
+Validation Performance (20% holdout):
+----------------------------------------------------------------------
+Accuracy: 0.8736 (87.36%)
+Average AUC: 0.9603
+
+XGBoost alone:  0.8650 (86.50%)
+LightGBM alone: 0.8740 (87.40%)
+Ensemble:       0.8736 (87.36%)
+
+Ensemble weights: XGBoost=0.45, LightGBM=0.55
+
+Class 1 AUC: 0.9881
+Class 2 AUC: 0.9685
+Class 3 AUC: 0.9886
+Class 4 AUC: 0.8959

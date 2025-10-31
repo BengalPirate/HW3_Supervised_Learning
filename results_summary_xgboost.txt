@@ -1,0 +1,12 @@
+CSC 621 - HW3 XGBoost Classification Results
+======================================================================
+
+Validation Performance (20% holdout):
+----------------------------------------------------------------------
+Accuracy: 0.9001 (90.01%)
+Average AUC: 0.9764
+
+Class 1 AUC: 0.9880
+Class 2 AUC: 0.9794
+Class 3 AUC: 0.9872
+Class 4 AUC: 0.9511
