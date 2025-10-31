@@ -74,26 +74,59 @@ The top features were extracted using feature importance from the best performin
 
 ## Results
 
-### Cross-Validation Performance
-[Results will be populated after running the pipeline]
+### Best Pipeline Performance: **91.58% Validation Accuracy**
+
+**File**: `testLabel_lightgbm_mi_18ensemble.txt`
+**Pipeline**: `ultimate_pipeline.py`
+**Average AUC**: 0.9885
+
+#### Pipeline Evolution
+1. **Fast XGBoost** (`fast_xgboost.py`): 90.01% - Baseline
+2. **Hypertuned LightGBM** (`hypertuned_pipeline.py`): 90.42% - Config search
+3. **Partner-Inspired** (`partner_inspired_pipeline.py`): 90.84% - Noise-robust
+4. **Ultimate Pipeline** (`ultimate_pipeline.py`): **91.58%** ⭐ - MI + 18-model ensemble
+
+#### Class-wise AUC (Ultimate Pipeline)
+- Class 1: 0.9901
+- Class 2: 0.9804
+- Class 3: 0.9911
+- Class 4: 0.8843 (lowest due to class imbalance)
+
+#### Benchmarks
+- **Target**: 92.82%
+- **Partner**: 92.58%
+- **Our Result**: 91.58% (Gap: -1.24% to target)
 
 ### Final Classifier Selection
-The best performing classifier based on average AUC across all classes.
+LightGBM with Mutual Information feature selection and 18-model weighted ensemble.
 
 ## Files
 
-### Code
-- `explore_data.py`: Exploratory data analysis and visualization
-- `classification_pipeline.py`: Main classification pipeline with all algorithms
-- `generate_blind_predictions.py`: Script to generate predictions on blind data
+### Code - Pipeline Evolution
+- `explore_data.py`: Initial exploratory data analysis
+- `classification_pipeline.py`: Original multi-algorithm pipeline
+- `fast_xgboost.py`: Quick XGBoost baseline (90.01%)
+- `optimized_pipeline.py`: Early SMOTE attempt (87.36% - failed)
+- `hypertuned_pipeline.py`: LightGBM with 4 configs (90.42%)
+- `partner_inspired_pipeline.py`: Noise-robust approach (90.84%)
+- `ultimate_pipeline.py`: **BEST** - MI + 18-ensemble (91.58%)
+- `final_comprehensive_pipeline.py`: Multi-algo attempt (crashed)
 
-### Output
-- `testLabel.txt`: Test set predictions (5-column tab-delimited format)
-- `blindLabel.txt`: Blind set predictions (generated when blind data available)
-- `roc_curves_comparison.png`: ROC curves comparing all algorithms
-- `feature_importance.png`: Visualization of top 20 features
-- `feature_importance.csv`: Complete feature importance rankings
-- `eda_results.png`: Exploratory data analysis visualizations
+### Predictions - Test Set
+- `testLabel_lightgbm_mi_18ensemble.txt`: **PRIMARY SUBMISSION** (91.58%)
+- `testLabel_ultimate.txt`: Same as above (alternate name)
+- `testLabel.txt`: Generic testLabel output
+- `testLabel_partner_inspired.txt`: From partner-inspired pipeline
+- `testLabel_hypertuned.txt`: From hypertuned pipeline
+- `testLabel_optimized.txt`: From SMOTE attempt
+- `testLabel_final.txt`: From fast baseline
+- `testLabel_quick.txt`: Early quick test
+
+### Visualizations
+- `roc_curves_xgboost.png`: XGBoost baseline ROC curves
+- `roc_curves_optimized.png`: Multi-model comparison
+- `roc_curves_hypertuned.png`: LightGBM config comparison
+- `eda_results.png`: Exploratory data analysis
 
 ## How to Reproduce Results
 
@@ -159,12 +192,66 @@ Each row corresponds to a sample in the test/blind data.
 2. Top 20 features capture majority of discriminative power
 3. Feature importance varies across different class classifiers
 
-## Future Improvements
-1. Feature selection to reduce dimensionality
-2. Advanced ensemble methods (stacking, blending)
-3. Neural network architectures (deep learning)
-4. Hyperparameter optimization with Bayesian optimization
-5. Handling class imbalance with SMOTE or other techniques
+## Ultimate Pipeline Strategy (91.58%)
+
+### Key Techniques
+
+#### 1. Mutual Information Feature Selection
+```python
+mi_scores = mutual_info_classif(X_base, y, random_state=42)
+mi_threshold = np.percentile(mi_scores, 10)  # Keep top 90%
+selected_features = np.where(mi_scores > mi_threshold)[0]
+# Result: 411 → 314 features
+```
+
+#### 2. Advanced Feature Engineering
+- Polynomial features (x², x³) for top 15 MI features
+- Interaction features (multiplication, ratios) for top 8 features
+- Statistical aggregations (mean, std, median, Q1, Q3, min, max)
+- Final: 314 → 347 features
+
+#### 3. 18-Model Weighted Ensemble
+- 15 models from best hyperparameter configuration
+- 3 models from second-best configuration (diversity)
+- Different random seeds for each model
+- Weighted averaging (0.7 weight for second-best models)
+
+#### 4. Hyperparameter Configuration (Best)
+```python
+{
+    'learning_rate': 0.025,
+    'num_leaves': 70,
+    'max_depth': 14,
+    'min_data_in_leaf': 12,
+    'feature_fraction': 0.88,
+    'bagging_fraction': 0.88,
+    'lambda_l1': 0.1,
+    'lambda_l2': 0.4,
+}
+```
+
+## Next Steps - Optimization Branch
+
+Planned enhancements to close 1.24% gap to 92.82% target:
+
+1. **Weighted Ensemble Optimization** (Quick Win)
+   - Optimize weights on validation set instead of equal/fixed weights
+   - Expected gain: 0.3-0.5%
+
+2. **Pseudo-Labeling** (Semi-Supervised Learning)
+   - Use high-confidence test predictions as training data
+   - Iteratively retrain model with expanded dataset
+   - Can add 1000s of quality training samples
+
+3. **Stacking Ensemble**
+   - Train meta-learner on base model predictions
+   - Use diverse models (LightGBM, XGBoost, CatBoost, Neural Net)
+   - Capture non-linear relationships
+
+4. **Optuna Hyperparameter Tuning**
+   - Bayesian optimization instead of manual configs
+   - Search 10-20 configurations systematically
+   - Per-class hyperparameter tuning
 
 ## References
 - Scikit-learn documentation: https://scikit-learn.org/
